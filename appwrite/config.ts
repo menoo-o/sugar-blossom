@@ -30,4 +30,33 @@ const createAdminClient = async (): Promise<AdminClient> => {
     };
 };
 
-export { createAdminClient };
+const createSessionClient = async (session): Promise<AdminClient> => {
+    const endpoint = process.env.NEXT_PUBLIC_ENDPOINT;
+    const projectId = process.env.NEXT_PUBLIC_PROJECT_ID;
+
+
+    // Validate environment variables
+    if (!endpoint || !projectId ) {
+        throw new Error("Appwrite configuration is missing in environment variables.");
+    }
+
+    const client = new Client()
+        .setEndpoint(endpoint)
+        .setProject(projectId)
+
+    if(session){
+        client.setSession(session)
+    }
+
+
+    return {
+        get account() {
+            return new Account(client);
+        },
+        get databases() {
+            return new Databases(client);
+        },
+    };
+};
+
+export { createAdminClient, createSessionClient };

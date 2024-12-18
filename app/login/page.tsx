@@ -1,12 +1,28 @@
 import { log } from 'console'
 import React from 'react'
+import { createAdminClient } from '@/appwrite/config'
+import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
+
 
 export default function Loginpage() {
-  async function createSession(formData:any) {
+  async function createSession(formData:FormData) {
     "use server"
+    const data = Object.fromEntries(formData)
+    const {email, password} = data;
 
-    console.log(formData);
-    
+    const { account } = await createAdminClient();
+
+    const session = await account.createEmailPasswordSession(email, password)
+    cookies().set('session', session.secret, {
+      httpOnly: true,
+      sameSite: "strict",
+      secure: true,
+      expires: new Date(session.expire),
+      path: '/',
+    })
+
+    redirect("/");
   }
   return (
     <div>
@@ -26,7 +42,7 @@ export default function Loginpage() {
             <label htmlFor="password">Enter Password</label>
             <input type='password' name="password" id='password'
               placeholder='enter password'
-              defaultValue={12345}
+              defaultValue={'ABCabc!!'}
             >
             </input>
 
